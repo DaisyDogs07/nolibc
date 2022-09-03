@@ -11,7 +11,8 @@ int* const nolibc___errno_location() {
 }
 
 __attribute__((noreturn)) int nolibc_abort() {
-  syscall2(SYS_kill, syscall0(SYS_getpid), SIGABRT);
+  int pid = syscall0(SYS_getpid);
+  syscall2(SYS_kill, pid, SIGABRT);
   for (;;);
 }
 
