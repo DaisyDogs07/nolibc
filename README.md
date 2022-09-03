@@ -1,4 +1,4 @@
-This is my own simplified version if libc.
+This is my own simplified version of libc.
 
 It only has some functions cuz I'm not that skilled at coding and problem solving :3
 
