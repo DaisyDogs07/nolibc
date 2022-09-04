@@ -40,56 +40,44 @@ char nolibc_memcmp(const void* str1, const void* str2, size_t count) {
   return 0;
 }
 
-#ifndef container_of
-#define container_of(PTR, TYPE, FIELD) ({      \
-  __typeof__(((TYPE*)0)->FIELD)* __FIELD_PTR = (PTR);  \
-  (TYPE*)((char*)__FIELD_PTR - __builtin_offsetof(TYPE, FIELD));  \
-})
-#endif
-
 struct nolibc_heap {
   size_t len;
-  char user_p[] __attribute__((__aligned__));
+  char user_p[];
 };
 
 void nolibc_free(void* ptr) {
-  struct nolibc_heap* heap;
   if (!ptr)
     return;
-  heap = container_of(ptr, struct nolibc_heap, user_p);
+  struct nolibc_heap* heap = ptr - __builtin_offsetof(struct nolibc_heap, user_p);
   nolibc_munmap(heap, heap->len);
 }
 void* nolibc_malloc(size_t len) {
-  struct nolibc_heap* heap;
-  len = sizeof(*heap) + len;
-  len = (len + 4095UL) & -4096UL;
-  heap = nolibc_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+  len += __builtin_offsetof(struct nolibc_heap, user_p);
+  struct nolibc_heap* heap = nolibc_mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
   if (__builtin_expect(heap == MAP_FAILED, 0))
     return NULL;
   heap->len = len;
   return heap->user_p;
 }
 void* nolibc_calloc(size_t size, size_t nmemb) {
-  void* orig;
   size_t res = 0;
   if (__builtin_expect(__builtin_mul_overflow(nmemb, size, &res), 0))
     return NULL;
   return nolibc_malloc(res);
 }
-void* nolibc_realloc(void* old_ptr, size_t new_size) {
-  struct nolibc_heap* heap;
-  size_t user_p_len;
-  void* ret;
-  if (!old_ptr)
-    return nolibc_malloc(new_size);
-  heap = container_of(old_ptr, struct nolibc_heap, user_p);
-  user_p_len = heap->len - sizeof(*heap);
-  if (user_p_len >= new_size)
-    return old_ptr;
-  ret = nolibc_malloc(new_size);
+void* nolibc_realloc(void* ptr, size_t size) {
+  if (!ptr)
+    return nolibc_malloc(size);
+  if (size == 0) {
+    nolibc_free(ptr);
+    return NULL;
+  }
+  struct nolibc_heap* heap = ptr - __builtin_offsetof(struct nolibc_heap, user_p);
+  size_t ptr_len = heap->len - sizeof(*heap);
+  void* ret = nolibc_malloc(size);
   if (__builtin_expect(!ret, 0))
     return NULL;
-  nolibc_memcpy(ret, heap->user_p, heap->len);
+  nolibc_memcpy(ret, heap->user_p, ptr_len < size ? ptr_len : size);
   nolibc_munmap(heap, heap->len);
   return ret;
 }
