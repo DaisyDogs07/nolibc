@@ -2,10 +2,11 @@
 #include "mem.h"
 #include "sys.h"
 
-void nolibc_memset(void* dst, char c, size_t len) {
+void* nolibc_memset(void* dst, char c, size_t len) {
   char* p = (char*)dst;
   while (len--)
     *(p++) = c;
+  return dst;
 }
 void* nolibc_memmove(void* dest, const void* src, size_t len) {
   char* d = (char*)dest;
@@ -28,7 +29,7 @@ void* nolibc_memcpy(void* dest, const void* src, size_t len) {
     *d++ = *s++;
   return dest;
 }
-char nolibc_memcmp(const void* str1, const void* str2, size_t count) {
+int nolibc_memcmp(const void* str1, const void* str2, size_t count) {
   const char* s1 = (const char*)str1;
   const char* s2 = (const char*)str2;
   while (--count) {
