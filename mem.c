@@ -69,10 +69,6 @@ void* nolibc_calloc(size_t size, size_t nmemb) {
 void* nolibc_realloc(void* ptr, size_t size) {
   if (!ptr)
     return nolibc_malloc(size);
-  if (size == 0) {
-    nolibc_free(ptr);
-    return NULL;
-  }
   struct nolibc_heap* heap = ptr - __builtin_offsetof(struct nolibc_heap, user_p);
   size_t ptr_len = heap->len - sizeof(*heap);
   void* ret = nolibc_malloc(size);
