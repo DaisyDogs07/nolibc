@@ -66,9 +66,9 @@ int nolibc_fchmod(int fd, mode_t mode) {
 }
 // TODO: Implement `atexit` and `on_exit`. And hopefully not let procrastination get in the way
 __attribute__((noreturn)) void nolibc_exit(int status) {
-  syscall1(__NR_fsync(0)); // in
-  syscall1(__NR_fsync(1)); // out
-  syscall1(__NR_fsync(2)); // err
+  syscall1(__NR_fsync, 0); // in
+  syscall1(__NR_fsync, 1); // out
+  syscall1(__NR_fsync, 2); // err
   syscall1(__NR_exit, status & 0377);
   for (;;);
 }
