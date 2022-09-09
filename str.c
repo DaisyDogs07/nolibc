@@ -28,11 +28,18 @@ char* nolibc_strcat(char* dest, const char* src) {
   while ((*dest++ = *src++));
   return ret;
 }
+char* nolibc_strncat(char* dest, const char* src, size_t n) {
+  char* ret = dest;
+  dest += nolibc_strlen(dest);
+  while (n-- && (*dest++ = *src++));
+  return ret;
+}
 char* nolibc_strchr(const char* str, char c) {
-  do {
+  while (*str) {
     if (*str == c)
       return (char*)str;
-  } while (*str++);
+    str++;
+  }
   return (char*)0;
 }
 int nolibc_strcmp(const char* s1, const char* s2) {
@@ -62,9 +69,19 @@ char* nolibc_strcpy(char* dest, const char* src) {
   while ((*dest++ = *src++));
   return ret;
 }
+char* nolibc_strncpy(char* dest, const char* src, size_t n) {
+  char* ret = dest;
+  while (n-- && (*dest++ = *src++));
+  return ret;
+}
 size_t nolibc_strlen(const char* str) {
   size_t i = 0;
   while (*str++) ++i;
+  return i;
+}
+size_t nolibc_strnlen(const char* str, size_t n) {
+  size_t i = 0;
+  while (i != n && *str++) ++i;
   return i;
 }
 char* nolibc_strdup(const char* str) {
