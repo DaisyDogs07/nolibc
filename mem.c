@@ -1,4 +1,6 @@
+#include <asm/unistd.h>
 #include <sys/mman.h>
+#include "arch.h"
 #include "mem.h"
 #include "sys.h"
 
@@ -50,7 +52,7 @@ void nolibc_free(void* ptr) {
   if (!ptr)
     return;
   struct nolibc_heap* heap = ptr - __builtin_offsetof(struct nolibc_heap, user_p);
-  nolibc_munmap(heap, heap->len);
+  syscall2(__NR_munmap, heap, heap->len);
 }
 void* nolibc_malloc(size_t len) {
   len += __builtin_offsetof(struct nolibc_heap, user_p);
@@ -70,13 +72,11 @@ void* nolibc_realloc(void* ptr, size_t size) {
   if (!ptr)
     return nolibc_malloc(size);
   struct nolibc_heap* heap = ptr - __builtin_offsetof(struct nolibc_heap, user_p);
-  size_t ptr_len = heap->len - sizeof(*heap);
+  size_t ptr_len = heap->len - __builtin_offsetof(struct nolibc_heap, user_p);
   if (ptr_len == size)
     return ptr;
-  void* ret = nolibc_malloc(size);
-  if (__builtin_expect(!ret, 0))
+  heap = nolibc_mremap(heap, heap->len, size, MREMAP_MAYMOVE);
+  if (__builtin_expect(heap == MAP_FAILED, 0))
     return NULL;
-  nolibc_memcpy(ret, heap->user_p, ptr_len < size ? ptr_len : size);
-  nolibc_munmap(heap, heap->len);
-  return ret;
+  return heap->user_p;
 }

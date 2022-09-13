@@ -1,20 +1,20 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bool nolibc_isalnum(char);
-bool nolibc_isalpha(char);
-bool nolibc_isascii(char);
-bool nolibc_isblank(char);
-bool nolibc_isdigit(char);
-bool nolibc_isspace(char);
-char nolibc_toascii(char);
-char* nolibc_strcat(char*, const char*);
-char* nolibc_strncat(char*, const char*, size_t);
-char* nolibc_strchr(const char*, char);
-int nolibc_strcmp(const char*, const char*);
-int nolibc_strncmp(const char*, const char*, size_t);
-char* nolibc_strcpy(char*, const char*);
-char* nolibc_strncpy(char*, const char*, size_t);
-size_t nolibc_strlen(const char*);
-size_t nolibc_strnlen(const char*, size_t);
-char* nolibc_strdup(const char*);
+bool nolibc_isalnum(char c);
+bool nolibc_isalpha(char c);
+bool nolibc_isascii(char c);
+bool nolibc_isblank(char c);
+bool nolibc_isdigit(char c);
+bool nolibc_isspace(char c);
+char nolibc_toascii(char c);
+char* nolibc_strcat(char* dest, const char* src);
+char* nolibc_strncat(char* dest, const char* src, size_t n);
+char* nolibc_strchr(const char* str, char c);
+int nolibc_strcmp(const char* s1, const char* s2);
+int nolibc_strncmp(const char* s1, const char* s2, size_t n);
+char* nolibc_strcpy(char* dest, const char* src);
+char* nolibc_strncpy(char* dest, const char* src, size_t n);
+size_t nolibc_strlen(const char* str);
+size_t nolibc_strnlen(const char* str, size_t n);
+char* nolibc_strdup(const char* str);
