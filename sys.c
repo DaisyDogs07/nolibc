@@ -4,6 +4,7 @@
 #include <sys/signal.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <time.h>
 #include "arch.h"
 #include "sys.h"
@@ -438,16 +439,16 @@ ssize_t nolibc_readv(int fd, const struct iovec* iov, int iovcnt) {
   }
   return ret;
 }
-int nolibc_renameat(int olddirfd, const char* oldpath, int newdirfd, const char* newpath) {
-  int ret = syscall4(__NR_renameat, olddirfd, oldpath, newdirfd, newpath);
+int nolibc_rename(const char* oldpath, const char* newpath) {
+  int ret = syscall2(__NR_rename, oldpath, newpath);
   if (ret < 0) {
     nolibc_errno = -ret;
     ret = -1;
   }
   return ret;
 }
-int nolibc_rename(const char* oldpath, const char* newpath) {
-  int ret = syscall2(__NR_rename, oldpath, newpath);
+int nolibc_renameat(int olddirfd, const char* oldpath, int newdirfd, const char* newpath) {
+  int ret = syscall4(__NR_renameat, olddirfd, oldpath, newdirfd, newpath);
   if (ret < 0) {
     nolibc_errno = -ret;
     ret = -1;
@@ -501,7 +502,7 @@ int nolibc_sched_setparam(pid_t pid, const struct sched_param* param) {
   }
   return ret;
 }
-static inline int in_time_t_range(time_t t) {
+static inline bool in_time_t_range(time_t t) {
   int32_t s = t;
   return s == t;
 }
