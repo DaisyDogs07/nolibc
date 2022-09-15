@@ -164,10 +164,10 @@ double nolibc_modf(double x, double* iptr) {
       if ((i0 & i) == 0) {
         *iptr = x;
         int64_t tmp = i0 & 0x8000000000000000ul;
-        return *(double*)tmp;
+        return *(double*)&tmp;
       } else {
         int64_t tmp = i0 & (~i);
-        *iptr = *(double*)tmp;
+        *iptr = *(double*)&tmp;
         return x - *iptr;
       }
     }
@@ -176,6 +176,6 @@ double nolibc_modf(double x, double* iptr) {
     if (j0 == 0x400 && (i0 & 0xffffffffffffful))
       return x * 1.0;
     int64_t tmp = i0 & 0x8000000000000000ul;
-    return *(double*)tmp;
+    return *(double*)&tmp;
   }
 }

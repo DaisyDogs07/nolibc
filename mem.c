@@ -4,11 +4,85 @@
 #include "mem.h"
 #include "sys.h"
 
-void* nolibc_memset(void* dst, char c, size_t len) {
-  char* p = (char*)dst;
+void* nolibc_memchr(const void* s, char c, size_t n) {
+  const char* str = (const char*)s;
+  while (n--) {
+    if (*str == c)
+      return (void*)str;
+    ++str;
+  }
+  return NULL;
+}
+void* nolibc_memrchr(const void* s, char c, size_t n) {
+  const char* str = (const char*)s;
+  str += n;
+  while (n--) {
+    if (*--str == c)
+      return (void*)str;
+  }
+  return NULL;
+}
+void* nolibc_rawmemchr(const void* s, char c) {
+  const char* str = (const char*)s;
+  while (1) {
+    if (*str == c)
+      return (void*)str;
+    ++str;
+  }
+  return NULL;
+}
+int nolibc_memcmp(const void* s1, const void* s2, size_t count) {
+  const char* str1 = (const char*)s1;
+  const char* str2 = (const char*)s2;
+  while (--count) {
+    char c1 = *str1++;
+    char c2 = *str2++;
+    if (c1 != c2)
+      return c1 - c2;
+  }
+  return 0;
+}
+void* nolibc_memcpy(void* dest, const void* src, size_t len) {
+  char* d = (char*)dest;
+  const char* s = (const char*)src;
   while (len--)
-    *(p++) = c;
-  return dst;
+    *d++ = *s++;
+  return dest;
+}
+void* nolibc_memccpy(void* dest, const void* src, char c, size_t len) {
+  char* d = (char*)dest;
+  const char* s = (const char*)src;
+  while (len--) {
+    *d++ = *s;
+    if (*s++ == c)
+      return d;
+  }
+  return NULL;
+}
+void* nolibc_mempcpy(void* dest, const void* src, size_t len) {
+  char* d = (char*)dest;
+  const char* s = (const char*)src;
+  while (len--)
+    *d++ = *s++;
+  return d;
+}
+void* nolibc_memfrob(void* s, size_t n) {
+  char* str = (char*)s;
+  while (n--)
+    *str++ ^= 42;
+  return s;
+}
+void* nolibc_memmem(const void* haystack, size_t haystack_len, const void* needle, size_t needle_len) {
+  const char* h = (const char*)haystack;
+  const char* n = (const char*)needle;
+  if (needle_len == 0)
+    return (void*)h;
+  while (haystack_len-- >= needle_len) {
+    if (*h == *n && nolibc_memcmp(h, n, needle_len) == 0)
+      return (void*)h;
+    ++h;
+  }
+  return NULL;
 }
 void* nolibc_memmove(void* dest, const void* src, size_t len) {
   char* d = (char*)dest;
@@ -24,23 +98,11 @@ void* nolibc_memmove(void* dest, const void* src, size_t len) {
   }
   return dest;
 }
-void* nolibc_memcpy(void* dest, const void* src, size_t len) {
-  char* d = (char*)dest;
-  const char* s = (const char*)src;
+void* nolibc_memset(void* dst, char c, size_t len) {
+  char* p = (char*)dst;
   while (len--)
-    *d++ = *s++;
-  return dest;
-}
-int nolibc_memcmp(const void* str1, const void* str2, size_t count) {
-  const char* s1 = (const char*)str1;
-  const char* s2 = (const char*)str2;
-  while (--count) {
-    char c1 = *s1++;
-    char c2 = *s2++;
-    if (c1 != c2)
-      return c1 < c2 ? -1 : 1;
-  }
-  return 0;
+    *p++ = c;
+  return dst;
 }
 
 struct nolibc_heap {

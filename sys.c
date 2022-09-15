@@ -1,12 +1,13 @@
 #include <asm/errno.h>
 #include <asm/unistd.h>
 #include <sys/mman.h>
+#include <sys/param.h>
 #include <sys/signal.h>
 #include <fcntl.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <time.h>
 #include "arch.h"
+#include "mem.h"
 #include "sys.h"
 
 __thread int nolibc_errno;
@@ -22,7 +23,12 @@ __attribute__((noreturn)) int nolibc_abort() {
 }
 
 int nolibc_accept(int sockfd, struct sockaddr* addr, socklen_t* addrlen) {
-  int ret = syscall3(__NR_accept, sockfd, addr, addrlen);
+  int ret;
+#ifdef __NR_accept
+  ret = syscall3(__NR_accept, sockfd, addr, addrlen);
+#else
+  ret = syscall4(__NR_accept4, sockfd, addr, addrlen, 0);
+#endif
   if (ret < 0) {
     nolibc_errno = -ret;
     ret = -1;
@@ -159,6 +165,36 @@ int nolibc_fchmod(int fd, mode_t mode) {
   }
   return ret;
 }
+int nolibc_chown(const char* path, uid_t owner, gid_t group) {
+  int ret = syscall3(__NR_chown, path, owner, group);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+}
+int nolibc_fchown(int fd, uid_t owner, gid_t group) {
+  int ret = syscall3(__NR_fchown, fd, owner, group);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+}
+int nolibc_chroot(const char* path) {
+  int ret = syscall1(__NR_chroot, path);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+}
+clock_t nolibc_clock() {
+  struct timespec ts;
+  if (syscall2(__NR_clock_gettime, CLOCK_PROCESS_CPUTIME_ID, &ts) != 0)
+    return -1;
+  return ts.tv_sec * CLOCKS_PER_SEC + ts.tv_nsec / (1000000000 / CLOCKS_PER_SEC);
+}
 int nolibc_clock_adjtime(clockid_t clk, struct timex* tx) {
   int ret = syscall2(__NR_clock_adjtime, clk, tx);
   if (ret < 0) {
@@ -205,11 +241,30 @@ int nolibc_clock_settime(clockid_t clk, const struct timespec* tp) {
   }
   return ret;
 }
-clock_t nolibc_clock() {
-  struct timespec ts;
-  if (syscall2(__NR_clock_gettime, CLOCK_PROCESS_CPUTIME_ID, &ts) != 0)
-    return -1;
-  return ts.tv_sec * CLOCKS_PER_SEC + ts.tv_nsec / (1000000000 / CLOCKS_PER_SEC);
+int nolibc_clone(int (*fn)(void*), void* child_stack, int flags, void* arg, ...) {
+  void* ptid;
+  void* tls;
+  void* ctid;
+  va_list ap;
+  va_start(ap, arg);
+  ptid = va_arg(ap, void*);
+  tls = va_arg(ap, void*);
+  ctid = va_arg(ap, void*);
+  va_end(ap);
+  int ret;
+  if (!fn || !child_stack) {
+    nolibc_errno = EINVAL;
+    ret = -1;
+  } else {
+    ret = syscall5(__NR_clone, flags, child_stack, ptid, tls, ctid);
+    if (ret == 0)
+      nolibc__exit(fn(arg));
+    else if (ret < 0) {
+      nolibc_errno = -ret;
+      ret = -1;
+    }
+  }
+  return ret;
 }
 void nolibc_close(int fd) {
   syscall1(__NR_close, fd);
@@ -289,9 +344,49 @@ int nolibc_getcpu(unsigned int* cpu, unsigned int* node) {
   }
   return ret;
 }
+int nolibc_getpagesize() {
+#ifdef	EXEC_PAGESIZE
+  return EXEC_PAGESIZE;
+#else
+#ifdef	NBPG
+#ifndef	CLSIZE
+#define	CLSIZE	1
+#endif
+  return NBPG * CLSIZE;
+#else
+  return NBPC;
+#endif
+#endif
+}
+int nolibc_getpeername(int fd, struct sockaddr* addr, socklen_t* len) {
+  int ret = syscall3(__NR_getpeername, fd, addr, len);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+}
 int nolibc_getpid() {
   return syscall0(__NR_getpid);
 }
+int nolibc_getpriority(int which, int who) {
+  int ret = syscall2(__NR_getpriority, which, who);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  if (ret >= 0)
+    ret = 20 - ret;
+  return ret;
+}
+int nolibc_setpriority(int which, int who, int prio) {
+  int ret = syscall3(__NR_setpriority, which, who, prio);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+} 
 int nolibc_kill(pid_t pid, int sig) {
   int ret = syscall2(__NR_kill, pid, sig);
   if (ret < 0) {
@@ -502,13 +597,9 @@ int nolibc_sched_setparam(pid_t pid, const struct sched_param* param) {
   }
   return ret;
 }
-static inline bool in_time_t_range(time_t t) {
-  int32_t s = t;
-  return s == t;
-}
 int nolibc_setitimer(int which, const struct itimerval* new_value, struct itimerval* old_value) {
-  if (!in_time_t_range(new_value->it_value.tv_sec) ||
-      !in_time_t_range(new_value->it_interval.tv_sec)) {
+  if ((int32_t)new_value->it_value.tv_sec != new_value->it_value.tv_sec ||
+      (int32_t)new_value->it_interval.tv_sec != new_value->it_interval.tv_sec) {
     nolibc_errno = EOVERFLOW;
     return -1;
   }
