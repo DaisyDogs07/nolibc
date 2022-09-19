@@ -133,6 +133,22 @@ void* nolibc_sbrk(intptr_t incr) {
   nolibc_errno = ENOMEM;
   return (void*)-1;
 }
+int nolibc_capget(cap_user_header_t header, cap_user_data_t data) {
+  int ret = syscall2(__NR_capget, header, data);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+}
+int nolibc_capset(cap_user_header_t header, const cap_user_data_t data) {
+  int ret = syscall2(__NR_capset, header, data);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret;
+}
 int nolibc_chdir(const char* path) {
   int ret = syscall1(__NR_chdir, path);
   if (ret < 0) {

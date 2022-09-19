@@ -1,3 +1,4 @@
+#include <linux/capability.h>
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <sys/socket.h>
@@ -26,6 +27,8 @@ useconds_t nolibc_ualarm(useconds_t usec, useconds_t interval);
 int nolibc_bind(int sockfd, const struct sockaddr* addr, socklen_t addrlen);
 void* nolibc_brk(void* addr);
 void* nolibc_sbrk(intptr_t incr);
+int nolibc_capget(cap_user_header_t header, cap_user_data_t data);
+int nolibc_capset(cap_user_header_t header, const cap_user_data_t data);
 int nolibc_chdir(const char* path);
 int nolibc_fchdir(int fd);
 int nolibc_chmod(const char* path, mode_t mode);

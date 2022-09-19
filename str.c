@@ -1,26 +1,34 @@
 #include "str.h"
 #include "mem.h"
 
-bool nolibc_isalnum(char c) {
-  return __builtin_isdigit(c) || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+char* nolibc_basename(const char* path) {
+  char* p = nolibc_strrchr(path, '/');
+  return p ? p + 1 : (char*)path;
 }
-bool nolibc_isalpha(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
-bool nolibc_isascii(char c) {
-  return !(c & ~0x7F);
-}
-bool nolibc_isblank(char c) {
-  return c == ' ' || c == '\t';
-}
-bool nolibc_isdigit(char c) {
-  return __builtin_isdigit(c);
-}
-bool nolibc_isspace(char c) {
-  return c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f' || c == '\r';
-}
-char nolibc_toascii(char c) {
-  return c & 0x7F;
+char* nolibc_dirname(const char* path) {
+  static const char dot[] = ".";
+  char* last_slash = path ? nolibc_strrchr(path, '/') : NULL;
+  if (last_slash && last_slash != path && last_slash[1] == '\0') {
+    char* runp = last_slash;
+    for (;runp != path; --runp)
+      if (runp[-1] != '/')
+        break;
+      if (runp != path)
+        last_slash = nolibc_memrchr(path, '/', runp - path);
+  }
+  if (last_slash) {
+    char* runp = last_slash;
+    for (;runp != path; --runp)
+      if (runp[-1] != '/')
+        break;
+    if (runp == path) {
+      if (last_slash == path + 1)
+        ++last_slash;
+      else last_slash = (char*)path + 1;
+    } else last_slash = runp;
+    last_slash[0] = '\0';
+  } else path = dot;
+  return (char*)path;
 }
 char* nolibc_strcat(char* dest, const char* src) {
   char* ret = dest;
@@ -41,6 +49,15 @@ char* nolibc_strchr(const char* str, char c) {
     ++str;
   }
   return NULL;
+}
+char* nolibc_strrchr(const char* str, char c) {
+  char* ret = NULL;
+  while (*str) {
+    if (*str == c)
+      ret = (char*)str;
+    ++str;
+  }
+  return ret;
 }
 int nolibc_strcmp(const char* s1, const char* s2) {
   while (1) {
@@ -177,14 +194,4 @@ int nolibc_strverscmp(const char* s1, const char* s2) {
       break;
   }
   return 0;
-}
-void nolibc_swab(const void* src, void* dest, ssize_t n) {
-  const char* s = (const char*)src;
-  char* d = (char*)dest;
-  while (n > 1) {
-    char c = *s++;
-    *d++ = *s++;
-    *d++ = c;
-    n -= 2;
-  }
 }

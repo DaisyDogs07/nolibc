@@ -1,5 +1,6 @@
 #include <stddef.h>
 
+void* nolibc_bzero(void* s, size_t n);
 void* nolibc_memchr(const void* s, char c, size_t n);
 void* nolibc_memrchr(const void* s, char c, size_t n);
 void* nolibc_rawmemchr(const void* s, char c);
@@ -11,6 +12,7 @@ void* nolibc_memfrob(void* s, size_t n);
 void* nolibc_memmem(const void* haystack, size_t haystack_len, const void* needle, size_t needle_len);
 void* nolibc_memmove(void* dest, const void* src, size_t len);
 void* nolibc_memset(void* dst, char c, size_t len);
+void nolibc_swab(const void* src, void* dest, size_t n);
 void nolibc_free(void* ptr);
 void* nolibc_malloc(size_t len);
 void* nolibc_calloc(size_t size, size_t nmemb);

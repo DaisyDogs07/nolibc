@@ -4,6 +4,9 @@
 #include "mem.h"
 #include "sys.h"
 
+void* nolibc_bzero(void* s, size_t n) {
+  return nolibc_memset(s, '\0', n);
+};
 void* nolibc_memchr(const void* s, char c, size_t n) {
   const char* str = (const char*)s;
   while (n--) {
@@ -103,6 +106,17 @@ void* nolibc_memset(void* dst, char c, size_t len) {
   while (len--)
     *p++ = c;
   return dst;
+}
+void nolibc_swab(const void* src, void* dest, size_t n) {
+  const char* s = (const char*)src;
+  char* d = (char*)dest;
+  n &= ~1;
+  while (n > 1) {
+    char c = *s++;
+    *d++ = *s++;
+    *d++ = c;
+    n -= 2;
+  }
 }
 
 struct nolibc_heap {
