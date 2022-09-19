@@ -14,6 +14,7 @@ void* nolibc_memmem(const void* haystack, size_t haystack_len, const void* needl
 void* nolibc_memmove(void* dest, const void* src, size_t len);
 void* nolibc_memset(void* dst, char c, size_t len);
 void nolibc_swab(const void* src, void* dest, size_t n);
+void nolibc_wordcopy(void* dst, const void* src, size_t len);
 void nolibc_free(void* ptr);
 void* nolibc_malloc(size_t len);
 void* nolibc_calloc(size_t size, size_t nmemb);
