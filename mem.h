@@ -1,5 +1,6 @@
 #include <stddef.h>
 
+void* nolibc_bcopy(const void* src, void* dest, size_t n);
 void* nolibc_bzero(void* s, size_t n);
 void* nolibc_memchr(const void* s, char c, size_t n);
 void* nolibc_memrchr(const void* s, char c, size_t n);
