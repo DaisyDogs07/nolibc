@@ -55,18 +55,6 @@ lldiv_t nolibc_lldiv(long long numer, long long denom) {
   ret.rem = numer % denom;
   return ret;
 }
-bool nolibc_finite(double x) {
-  int64_t lx = *(int64_t*)&x;
-  return (lx & 0x7ff0000000000000) != 0x7ff0000000000000;
-}
-bool nolibc_finitef(float x) {
-  int32_t lx = *(int32_t*)&x;
-  return (lx & 0x7f800000) != 0x7f800000;
-}
-bool nolibc_finitel(long double x) {
-  int64_t hx = (*(int64_t*)&x + 1);
-  return (hx & 0x7fff000000000000) != 0x7fff000000000000;
-}
 double nolibc_fma(double x, double y, double z) {
   return x * y + z;
 }
