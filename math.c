@@ -110,13 +110,13 @@ long double nolibc_frexpl(long double x, int* exp) {
   return x;
 }
 bool nolibc_isinf(double x) {
-  return nolibc_abs(x) == 1.0 / 0.0;
+  return nolibc_fabs(x) == 1.0 / 0.0;
 }
 bool nolibc_isnan(double x) {
   return x != x;
 }
 double nolibc_modf(double x, double* iptr) {
-  *iptr = nolibc_floor(x);
+  *iptr = nolibc_trunc(x);
   return x - *iptr;
 }
 double nolibc_scalbn(double x, int n) {
