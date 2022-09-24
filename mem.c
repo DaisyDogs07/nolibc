@@ -121,28 +121,6 @@ void nolibc_swab(const void* src, void* dest, size_t n) {
     n -= 2;
   }
 }
-void nolibc_wordcopy(void* dst, const void* src, size_t len) {
-  while (len >= 8) {
-    *(uint64_t*)dst = *(uint64_t*)src;
-    dst += 8;
-    src += 8;
-    len -= 8;
-  }
-  while (len >= 4) {
-    *(uint32_t*)dst = *(uint32_t*)src;
-    dst += 4;
-    src += 4;
-    len -= 4;
-  }
-  while (len >= 2) {
-    *(uint16_t*)dst = *(uint16_t*)src;
-    dst += 2;
-    src += 2;
-    len -= 2;
-  }
-  if (len)
-    *(uint8_t*)dst = *(uint8_t*)src;
-}
 
 struct nolibc_heap {
   size_t len;
