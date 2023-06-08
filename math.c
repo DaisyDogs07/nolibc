@@ -10,7 +10,7 @@ long nolibc_labs(long x) {
 long long nolibc_llabs(long long x) {
   return x < 0 ? -x : x;
 }
-double nollibc_fabs(double x) {
+double nolibc_fabs(double x) {
   return x < 0 ? -x : x;
 }
 float nolibc_fabsf(float x) {
@@ -18,15 +18,6 @@ float nolibc_fabsf(float x) {
 }
 long double nolibc_fabsl(long double x) {
   return x < 0 ? -x : x;
-}
-double nolibc_ceil(double x) {
-  return __builtin_ceil(x);
-}
-float nolibc_ceilf(float x) {
-  return __builtin_ceilf(x);
-}
-long double nolibc_ceill(long double x) {
-  return __builtin_ceill(x);
 }
 double nolibc_copysign(double x, double y) {
   return y < 0 ? -x : x;
@@ -115,10 +106,6 @@ bool nolibc_isinf(double x) {
 bool nolibc_isnan(double x) {
   return x != x;
 }
-double nolibc_modf(double x, double* iptr) {
-  *iptr = nolibc_trunc(x);
-  return x - *iptr;
-}
 double nolibc_scalbn(double x, int n) {
   return x * (1 << n);
 }
@@ -130,7 +117,4 @@ long double nolibc_scalbnl(long double x, int n) {
 }
 bool nolibc_signbit(double x) {
   return x < 0;
-}
-double nolibc_trunc(double x) {
-  return __builtin_trunc(x);
 }
