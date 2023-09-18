@@ -6,6 +6,6 @@ Also this is only available in Linux, Sorry.
 
 Compile the library with this:
 ```console
-gcc -shared -nostdlib -fno-builtin -fno-math-errno -fno-stack-protector -fPIC -O3 -o libnoc.so.1 *.c
+gcc -shared -ffreestanding -nostdlib -fno-builtin -fno-math-errno -fno-stack-protector -fno-plt -fPIC -O3 -o libnoc.so.1 *.c
 ar -crs libnoc.a libnoc.so.1
 ```
