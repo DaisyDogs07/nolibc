@@ -157,5 +157,6 @@ void* nolibc_realloc(void* ptr, size_t size) {
   heap = nolibc_mremap(heap, heap->len, size, MREMAP_MAYMOVE);
   if (__builtin_expect(heap == MAP_FAILED, 0))
     return NULL;
+  heap->len = size;
   return heap->user_p;
 }
