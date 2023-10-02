@@ -49,6 +49,9 @@ lldiv_t nolibc_lldiv(long long numer, long long denom) {
 double nolibc_fma(double x, double y, double z) {
   return x * y + z;
 }
+double nolibc_fmod(double x, double y) {
+  return x - y * (int)(x / y);
+}
 double nolibc_frexp(double x, int* exp) {
   *exp = 0;
   if (x == 0.0)
