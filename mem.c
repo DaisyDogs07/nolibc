@@ -4,6 +4,9 @@
 #include "mem.h"
 #include "sys.h"
 
+int nolibc_bcmp(const void* s1, const void* s2, size_t n) {
+  return nolibc_memcmp(s1, s2, n);
+}
 void* nolibc_bcopy(const void* src, void* dest, size_t n) {
   return nolibc_memmove(dest, src, n);
 }

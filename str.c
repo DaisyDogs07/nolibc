@@ -135,6 +135,28 @@ int nolibc_strncmp(const char* s1, const char* s2, size_t n) {
   }
   return 0;
 }
+int nolibc_strcasecmp(const char* s1, const char* s2) {
+  while (1) {
+    char c1 = nolibc_tolower(*s1++);
+    char c2 = nolibc_tolower(*s2++);
+    if (c1 != c2)
+      return c1 - c2;
+    if (c1 == '\0')
+      break;
+  }
+  return 0;
+}
+int nolibc_strncasecmp(const char* s1, const char* s2, size_t n) {
+  while (n--) {
+    char c1 = nolibc_tolower(*s1++);
+    char c2 = nolibc_tolower(*s2++);
+    if (c1 != c2)
+      return c1 - c2;
+    if (c1 == '\0')
+      break;
+  }
+  return 0;
+}
 char* nolibc_strcpy(char* dest, const char* src) {
   char* ret = dest;
   while ((*dest++ = *src++));
@@ -226,6 +248,18 @@ char* nolibc_strtok_r(char* str, const char* delim, char** saveptr) {
 char* nolibc_strtok(char* str, const char* delim) {
   static char* last;
   return nolibc_strtok_r(str, delim, &last);
+}
+double nolibc_atof(const char* str) {
+  return nolibc_strtod(str, (char**)NULL);
+}
+int nolibc_atoi(const char* str) {
+  return nolibc_strtol(str, (char**)NULL, 10);
+}
+long nolibc_atol(const char* str) {
+  return nolibc_strtol(str, (char**)NULL, 10);
+}
+long long nolibc_atoll(const char* str) {
+  return nolibc_strtoll(str, (char**)NULL, 10);
 }
 double nolibc_strtod(const char* str, char** endptr) {
   double ret = 0.0;
@@ -650,4 +684,30 @@ int nolibc_strverscmp(const char* s1, const char* s2) {
       break;
   }
   return 0;
+}
+char nolibc_getchar() {
+  char c;
+  nolibc_read(0, &c, 1);
+  return c;
+}
+char* nolibc_gets(char* str) {
+  char* ret = str;
+  while (1) {
+    char c = nolibc_getchar();
+    if (c == '\n')
+      break;
+    *str++ = c;
+  }
+  *str = '\0';
+  return ret;
+}
+int nolibc_putchar(char c) {
+  return nolibc_write(1, &c, 1);
+}
+int nolibc_puts(const char* str) {
+  int ret = 0;
+  while (*str)
+    ret += nolibc_putchar(*str++);
+  ret += nolibc_putchar('\n');
+  return ret;
 }
