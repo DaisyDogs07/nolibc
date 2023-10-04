@@ -346,7 +346,6 @@ int nolibc_eventfd_read(int fd, eventfd_t* value) {
 int nolibc_eventfd_write(int fd, eventfd_t value) {
   return nolibc_write(fd, &value, sizeof(eventfd_t)) != sizeof(eventfd_t) ? -1 : 0;
 }
-// TODO: Implement `atexit` and `on_exit`. And hopefully not let procrastination get in the way
 __attribute__((noreturn)) void nolibc__exit(int status) {
   syscall1(__NR_exit_group, status);
   syscall1(__NR_exit, status);
