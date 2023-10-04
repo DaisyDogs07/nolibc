@@ -71,15 +71,15 @@ bool nolibc_isspace(char c) {
   return (c >= 0x09 && c <= 0x0D) || c == 0x20;
 }
 bool nolibc_isxdigit(char c) {
-  return c >= '0' && c <= '9' ||
-    c >= 'a' && c <= 'f' ||
-    c >= 'A' && c <= 'F';
+  return (c >= '0' && c <= '9') ||
+    (c >= 'a' && c <= 'f') ||
+    (c >= 'A' && c <= 'F');
 }
 char nolibc_tolower(char c) {
-  return c >= 'A' && c <= 'Z' ? c + 0x20 : c;
+  return (c >= 'A' && c <= 'Z') ? c + 0x20 : c;
 }
 char nolibc_toupper(char c) {
-  return c >= 'a' && c <= 'z' ? c - 0x20 : c;
+  return (c >= 'a' && c <= 'z') ? c - 0x20 : c;
 }
 char nolibc_toascii(char c) {
   return c & 0x7F;
