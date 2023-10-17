@@ -119,5 +119,5 @@ long double nolibc_scalbnl(long double x, int n) {
   return x * (1 << n);
 }
 bool nolibc_signbit(double x) {
-  return x < 0;
+  return *(uint64_t*)&x >> 63;
 }
