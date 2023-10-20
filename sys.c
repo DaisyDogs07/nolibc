@@ -282,8 +282,13 @@ int nolibc_clone(int (*fn)(void*), void* child_stack, int flags, void* arg, ...)
   }
   return ret;
 }
-void nolibc_close(int fd) {
-  syscall1(__NR_close, fd);
+int nolibc_close(int fd) {
+  int ret = syscall1(__NR_close, fd);
+  if (ret < 0) {
+    nolibc_errno = -ret;
+    ret = -1;
+  }
+  return ret; 
 }
 int nolibc_connect(int fd, const struct sockaddr* addr, socklen_t len) {
   int ret = syscall3(__NR_connect, fd, addr, len);
@@ -360,12 +365,12 @@ int nolibc_getcpu(unsigned int* cpu, unsigned int* node) {
   return ret;
 }
 int nolibc_getpagesize() {
-#ifdef	EXEC_PAGESIZE
+#ifdef EXEC_PAGESIZE
   return EXEC_PAGESIZE;
 #else
-#ifdef	NBPG
-#ifndef	CLSIZE
-#define	CLSIZE	1
+#ifdef NBPG
+#ifndef CLSIZE
+#define CLSIZE 1
 #endif
   return NBPG * CLSIZE;
 #else
@@ -417,10 +422,10 @@ void* nolibc_mmap(void* addr, size_t length, int prot, int flags, int fd, off_t 
 #else
   int n;
 #if defined(__i386__)
-	n = __NR_mmap2;
-	offset >>= 12;
+  n = __NR_mmap2;
+  offset >>= 12;
 #else
-	n = __NR_mmap;
+  n = __NR_mmap;
 #endif
   void* ret = (void*)syscall6(n, addr, length, prot, flags, fd, offset);
   if ((unsigned long)ret >= -4095UL) {

@@ -44,7 +44,7 @@ int nolibc_clock_gettime(clockid_t clk, struct timespec* tp);
 int nolibc_clock_nanosleep(clockid_t clk, int flags, const struct timespec* req, struct timespec* rem);
 int nolibc_clock_settime(clockid_t clk, const struct timespec* tp);
 int nolibc_clone(int (*fn)(void*), void* child_stack, int flags, void* arg, ...);
-void nolibc_close(int fd);
+int nolibc_close(int fd);
 int nolibc_connect(int fd, const struct sockaddr* addr, socklen_t len);
 ssize_t nolibc_copy_file_range(int fd_in, off_t* off_in, int fd_out, off_t* off_out, size_t len, unsigned int flags);
 int nolibc_creat(const char* path, mode_t mode);

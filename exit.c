@@ -2,10 +2,10 @@
 #include "mem.h"
 #include "sys.h"
 
-static __thread struct nolibc_atexit_t* nolibc_exit_list = NULL;
-static __thread size_t nolibc_exit_length = 0;
-static __thread struct nolibc_at_quick_exit_t* nolibc_at_quick_exit_list = NULL;
-static __thread size_t nolibc_at_quick_exit_length = 0;
+__thread struct nolibc_atexit_t* nolibc_exit_list = NULL;
+__thread size_t nolibc_exit_length = 0;
+__thread struct nolibc_at_quick_exit_t* nolibc_at_quick_exit_list = NULL;
+__thread size_t nolibc_at_quick_exit_length = 0;
 
 int nolibc_atexit(void (*func)()) {
   struct nolibc_atexit_t entry;
