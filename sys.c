@@ -71,7 +71,7 @@ int nolibc_adjtime(const struct timeval* itv, struct timeval* otv) {
   struct timex tntx;
   if (itv) {
     tntx.modes = ADJ_OFFSET_SINGLESHOT;
-    tntx.offset = itv->tv_sec * 1000000 + itv->tv_usec;
+    tntx.offset = (itv->tv_sec * 1000000) + itv->tv_usec;
   } else tntx.modes = ADJ_OFFSET_SS_READ;
   if (nolibc_clock_adjtime(CLOCK_REALTIME, &tntx) < 0)
     return -1;

@@ -290,7 +290,7 @@ double nolibc_strtod(const char* str, char** endptr) {
     nolibc_free(tmp);
   }
   while (nolibc_isdigit(*str))
-    ret = ret * 10.0 + (*str++ - '0');
+    ret = (ret * 10.0) + (*str++ - '0');
   if (*str == '.') {
     ++str;
     size_t fracLen = 0;
@@ -301,7 +301,7 @@ double nolibc_strtod(const char* str, char** endptr) {
     str -= fracLen;
     double frac = 0.0;
     for (size_t i = 0; i != fracLen; ++i)
-      frac = frac * 10.0 + (*str++ - '0');
+      frac = (frac * 10.0) + (*str++ - '0');
     if (frac != 0.0) {
       while (fracLen--)
         frac /= 10.0;
@@ -318,7 +318,7 @@ double nolibc_strtod(const char* str, char** endptr) {
       ++str;
     int exp = 0;
     while (nolibc_isdigit(*str))
-      exp = exp * 10 + (*str++ - '0');
+      exp = (exp * 10) + (*str++ - '0');
     if (exp_sign == 1) {
       while (exp--)
         ret *= 10.0;
@@ -361,7 +361,7 @@ float nolibc_strtof(const char* str, char** endptr) {
     nolibc_free(tmp);
   }
   while (nolibc_isdigit(*str))
-    ret = ret * 10.0f + (*str++ - '0');
+    ret = (ret * 10.0f) + (*str++ - '0');
   if (*str == '.') {
     ++str;
     size_t fracLen = 0;
@@ -372,7 +372,7 @@ float nolibc_strtof(const char* str, char** endptr) {
     str -= fracLen;
     float frac = 0.0f;
     for (size_t i = 0; i != fracLen; ++i)
-      frac = frac * 10.0f + (*str++ - '0');
+      frac = (frac * 10.0f) + (*str++ - '0');
     if (frac != 0.0f) {
       while (fracLen--)
         frac /= 10.0f;
@@ -389,7 +389,7 @@ float nolibc_strtof(const char* str, char** endptr) {
       ++str;
     int exp = 0;
     while (nolibc_isdigit(*str))
-      exp = exp * 10 + (*str++ - '0');
+      exp = (exp * 10) + (*str++ - '0');
     if (exp_sign == 1) {
       while (exp--)
         ret *= 10.0f;
@@ -432,7 +432,7 @@ long double nolibc_strtold(const char* str, char** endptr) {
     nolibc_free(tmp);
   }
   while (nolibc_isdigit(*str))
-    ret = ret * 10.0l + (*str++ - '0');
+    ret = (ret * 10.0l) + (*str++ - '0');
   if (*str == '.') {
     ++str;
     size_t fracLen = 0;
@@ -443,7 +443,7 @@ long double nolibc_strtold(const char* str, char** endptr) {
     str -= fracLen;
     long double frac = 0.0l;
     for (size_t i = 0; i != fracLen; ++i)
-      frac = frac * 10.0l + (*str++ - '0');
+      frac = (frac * 10.0l) + (*str++ - '0');
     if (frac != 0.0l) {
       while (fracLen--)
         frac /= 10.0l;
@@ -460,7 +460,7 @@ long double nolibc_strtold(const char* str, char** endptr) {
       ++str;
     int exp = 0;
     while (nolibc_isdigit(*str))
-      exp = exp * 10 + (*str++ - '0');
+      exp = (exp * 10) + (*str++ - '0');
     if (exp_sign == 1) {
       while (exp--)
         ret *= 10.0l;
@@ -673,9 +673,9 @@ int nolibc_strverscmp(const char* s1, const char* s2) {
         int i1 = c1 - '0';
         int i2 = c2 - '0';
         while (nolibc_isdigit(*s1))
-          i1 = i1 * 10 + (*s1++ - '0');
+          i1 = (i1 * 10) + (*s1++ - '0');
         while (nolibc_isdigit(*s2))
-          i2 = i2 * 10 + (*s2++ - '0');
+          i2 = (i2 * 10) + (*s2++ - '0');
         if (i1 != i2)
           return i1 - i2;
       } else return c1 - c2;
