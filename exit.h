@@ -2,13 +2,13 @@
 #include "mem.h"
 #include "sys.h"
 
-struct nolibc_atexit_t {
+struct nolibc_exit_t {
   void (*atfunc)();
   void (*on_func)(int, void*);
   void* on_arg;
   bool is_on;
 };
-struct nolibc_at_quick_exit_t {
+struct nolibc_quick_exit_t {
   void (*func)();
 };
 
