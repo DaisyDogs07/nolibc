@@ -7,7 +7,6 @@ char* nolibc_basename(const char* path) {
   return p ? p + 1 : (char*)path;
 }
 char* nolibc_dirname(const char* path) {
-  static const char dot[] = ".";
   char* last_slash = path ? nolibc_strrchr(path, '/') : NULL;
   if (last_slash && last_slash != path && last_slash[1] == '\0') {
     char* runp = last_slash;
@@ -28,14 +27,14 @@ char* nolibc_dirname(const char* path) {
       else last_slash = (char*)path + 1;
     } else last_slash = runp;
     last_slash[0] = '\0';
-  } else path = dot;
+  } else path = ".";
   return (char*)path;
 }
 bool nolibc_isalnum(char c) {
-  return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+  return nolibc_isdigit(c) || nolibc_isalpha(c);
 }
 bool nolibc_isalpha(char c) {
-  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+  return nolibc_islower(c) || nolibc_isupper(c);
 }
 bool nolibc_isascii(char c) {
   return !(c & ~0x7F);
@@ -71,15 +70,15 @@ bool nolibc_isspace(char c) {
   return (c >= 0x09 && c <= 0x0D) || c == 0x20;
 }
 bool nolibc_isxdigit(char c) {
-  return (c >= '0' && c <= '9') ||
+  return nolibc_isdigit(c) ||
     (c >= 'a' && c <= 'f') ||
     (c >= 'A' && c <= 'F');
 }
 char nolibc_tolower(char c) {
-  return (c >= 'A' && c <= 'Z') ? c + 0x20 : c;
+  return nolibc_isupper(c) ? c + 0x20 : c;
 }
 char nolibc_toupper(char c) {
-  return (c >= 'a' && c <= 'z') ? c - 0x20 : c;
+  return nolibc_islower(c) ? c - 0x20 : c;
 }
 char nolibc_toascii(char c) {
   return c & 0x7F;
@@ -264,15 +263,15 @@ long long nolibc_atoll(const char* str) {
 double nolibc_strtod(const char* str, char** endptr) {
   double ret = 0.0;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
     ++str;
   } else if (*str == '+')
     ++str;
-  if (*str == 'i' || *str == 'I') {
-    char* tmp = nolibc_strdup(str);
+  if (nolibc_tolower(*str) == 'i') {
+    char* tmp = nolibc_strndup(str, 3);
     for (int i = 0; tmp[i]; ++i)
       tmp[i] = nolibc_tolower(tmp[i]);
     if (nolibc_strncmp(tmp, "inf", 3) == 0) {
@@ -280,8 +279,8 @@ double nolibc_strtod(const char* str, char** endptr) {
       return (1.0 * sign) / 0.0;
     }
     nolibc_free(tmp);
-  } else if (*str == 'n' || *str == 'N') {
-    char* tmp = nolibc_strdup(str);
+  } else if (nolibc_tolower(*str) == 'n') {
+    char* tmp = nolibc_strndup(str, 3);
     for (int i = 0; tmp[i]; ++i)
       tmp[i] = nolibc_tolower(tmp[i]);
     if (nolibc_strncmp(tmp, "nan", 3) == 0) {
@@ -290,12 +289,12 @@ double nolibc_strtod(const char* str, char** endptr) {
     }
     nolibc_free(tmp);
   }
-  while (*str >= '0' && *str <= '9')
+  while (nolibc_isdigit(*str))
     ret = ret * 10.0 + (*str++ - '0');
   if (*str == '.') {
     ++str;
     size_t fracLen = 0;
-    while (*str >= '0' && *str <= '9') {
+    while (nolibc_isdigit(*str)) {
       ++str;
       ++fracLen;
     }
@@ -309,7 +308,7 @@ double nolibc_strtod(const char* str, char** endptr) {
       ret += frac;
     }
   }
-  if (*str == 'e' || *str == 'E') {
+  if (nolibc_tolower(*str) == 'e') {
     ++str;
     int exp_sign = 1;
     if (*str == '-') {
@@ -318,7 +317,7 @@ double nolibc_strtod(const char* str, char** endptr) {
     } else if (*str == '+')
       ++str;
     int exp = 0;
-    while (*str >= '0' && *str <= '9')
+    while (nolibc_isdigit(*str))
       exp = exp * 10 + (*str++ - '0');
     if (exp_sign == 1) {
       while (exp--)
@@ -335,15 +334,15 @@ double nolibc_strtod(const char* str, char** endptr) {
 float nolibc_strtof(const char* str, char** endptr) {
   float ret = 0.0f;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
     ++str;
   } else if (*str == '+')
     ++str;
-  if (*str == 'i' || *str == 'I') {
-    char* tmp = nolibc_strdup(str);
+  if (nolibc_tolower(*str) == 'i') {
+    char* tmp = nolibc_strndup(str, 3);
     for (int i = 0; tmp[i]; ++i)
       tmp[i] = nolibc_tolower(tmp[i]);
     if (nolibc_strncmp(tmp, "inf", 3) == 0) {
@@ -351,8 +350,8 @@ float nolibc_strtof(const char* str, char** endptr) {
       return (1.0f * sign) / 0.0f;
     }
     nolibc_free(tmp);
-  } else if (*str == 'n' || *str == 'N') {
-    char* tmp = nolibc_strdup(str);
+  } else if (nolibc_tolower(*str) == 'n') {
+    char* tmp = nolibc_strndup(str, 3);
     for (int i = 0; tmp[i]; ++i)
       tmp[i] = nolibc_tolower(tmp[i]);
     if (nolibc_strncmp(tmp, "nan", 3) == 0) {
@@ -361,12 +360,12 @@ float nolibc_strtof(const char* str, char** endptr) {
     }
     nolibc_free(tmp);
   }
-  while (*str >= '0' && *str <= '9')
+  while (nolibc_isdigit(*str))
     ret = ret * 10.0f + (*str++ - '0');
   if (*str == '.') {
     ++str;
     size_t fracLen = 0;
-    while (*str >= '0' && *str <= '9') {
+    while (nolibc_isdigit(*str)) {
       ++str;
       ++fracLen;
     }
@@ -380,7 +379,7 @@ float nolibc_strtof(const char* str, char** endptr) {
       ret += frac;
     }
   }
-  if (*str == 'e' || *str == 'E') {
+  if (nolibc_tolower(*str) == 'e') {
     ++str;
     int exp_sign = 1;
     if (*str == '-') {
@@ -389,7 +388,7 @@ float nolibc_strtof(const char* str, char** endptr) {
     } else if (*str == '+')
       ++str;
     int exp = 0;
-    while (*str >= '0' && *str <= '9')
+    while (nolibc_isdigit(*str))
       exp = exp * 10 + (*str++ - '0');
     if (exp_sign == 1) {
       while (exp--)
@@ -406,15 +405,15 @@ float nolibc_strtof(const char* str, char** endptr) {
 long double nolibc_strtold(const char* str, char** endptr) {
   long double ret = 0.0l;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
     ++str;
   } else if (*str == '+')
     ++str;
-  if (*str == 'i' || *str == 'I') {
-    char* tmp = nolibc_strdup(str);
+  if (nolibc_tolower(*str) == 'i') {
+    char* tmp = nolibc_strndup(str, 3);
     for (int i = 0; tmp[i]; ++i)
       tmp[i] = nolibc_tolower(tmp[i]);
     if (nolibc_strncmp(tmp, "inf", 3) == 0) {
@@ -422,8 +421,8 @@ long double nolibc_strtold(const char* str, char** endptr) {
       return (1.0l * sign) / 0.0l;
     }
     nolibc_free(tmp);
-  } else if (*str == 'n' || *str == 'N') {
-    char* tmp = nolibc_strdup(str);
+  } else if (nolibc_tolower(*str) == 'n') {
+    char* tmp = nolibc_strndup(str, 3);
     for (int i = 0; tmp[i]; ++i)
       tmp[i] = nolibc_tolower(tmp[i]);
     if (nolibc_strncmp(tmp, "nan", 3) == 0) {
@@ -432,12 +431,12 @@ long double nolibc_strtold(const char* str, char** endptr) {
     }
     nolibc_free(tmp);
   }
-  while (*str >= '0' && *str <= '9')
+  while (nolibc_isdigit(*str))
     ret = ret * 10.0l + (*str++ - '0');
   if (*str == '.') {
     ++str;
     size_t fracLen = 0;
-    while (*str >= '0' && *str <= '9') {
+    while (nolibc_isdigit(*str)) {
       ++str;
       ++fracLen;
     }
@@ -451,7 +450,7 @@ long double nolibc_strtold(const char* str, char** endptr) {
       ret += frac;
     }
   }
-  if (*str == 'e' || *str == 'E') {
+  if (nolibc_tolower(*str) == 'e') {
     ++str;
     int exp_sign = 1;
     if (*str == '-') {
@@ -460,7 +459,7 @@ long double nolibc_strtold(const char* str, char** endptr) {
     } else if (*str == '+')
       ++str;
     int exp = 0;
-    while (*str >= '0' && *str <= '9')
+    while (nolibc_isdigit(*str))
       exp = exp * 10 + (*str++ - '0');
     if (exp_sign == 1) {
       while (exp--)
@@ -477,7 +476,7 @@ long double nolibc_strtold(const char* str, char** endptr) {
 long nolibc_strtol(const char* str, char** endptr, int base) {
   long ret = 0;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
@@ -487,7 +486,7 @@ long nolibc_strtol(const char* str, char** endptr, int base) {
   if (base == 0) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X') {
+      if (nolibc_tolower(*str) == 'x') {
         base = 16;
         ++str;
       } else base = 8;
@@ -498,7 +497,7 @@ long nolibc_strtol(const char* str, char** endptr, int base) {
   } else if (base == 16) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X')
+      if (nolibc_tolower(*str) == 'x')
         ++str;
     }
   }
@@ -524,7 +523,7 @@ long nolibc_strtol(const char* str, char** endptr, int base) {
 long long nolibc_strtoll(const char* str, char** endptr, int base) {
   long long ret = 0;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
@@ -534,7 +533,7 @@ long long nolibc_strtoll(const char* str, char** endptr, int base) {
   if (base == 0) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X') {
+      if (nolibc_tolower(*str) == 'x') {
         base = 16;
         ++str;
       } else base = 8;
@@ -545,7 +544,7 @@ long long nolibc_strtoll(const char* str, char** endptr, int base) {
   } else if (base == 16) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X')
+      if (nolibc_tolower(*str) == 'x')
         ++str;
     }
   }
@@ -571,7 +570,7 @@ long long nolibc_strtoll(const char* str, char** endptr, int base) {
 unsigned long nolibc_strtoul(const char* str, char** endptr, int base) {
   unsigned long ret = 0;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
@@ -581,7 +580,7 @@ unsigned long nolibc_strtoul(const char* str, char** endptr, int base) {
   if (base == 0) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X') {
+      if (nolibc_tolower(*str) == 'x') {
         base = 16;
         ++str;
       } else base = 8;
@@ -592,7 +591,7 @@ unsigned long nolibc_strtoul(const char* str, char** endptr, int base) {
   } else if (base == 16) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X')
+      if (nolibc_tolower(*str) == 'x')
         ++str;
     }
   }
@@ -618,7 +617,7 @@ unsigned long nolibc_strtoul(const char* str, char** endptr, int base) {
 unsigned long long nolibc_strtoull(const char* str, char** endptr, int base) {
   unsigned long long ret = 0;
   int sign = 1;
-  while (*str == ' ' || *str == '\t')
+  while (nolibc_isblank(*str))
     ++str;
   if (*str == '-') {
     sign = -1;
@@ -628,7 +627,7 @@ unsigned long long nolibc_strtoull(const char* str, char** endptr, int base) {
   if (base == 0) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X') {
+      if (nolibc_tolower(*str) == 'x') {
         base = 16;
         ++str;
       } else base = 8;
@@ -639,7 +638,7 @@ unsigned long long nolibc_strtoull(const char* str, char** endptr, int base) {
   } else if (base == 16) {
     if (*str == '0') {
       ++str;
-      if (*str == 'x' || *str == 'X')
+      if (nolibc_tolower(*str) == 'x')
         ++str;
     }
   }
@@ -669,13 +668,13 @@ int nolibc_strverscmp(const char* s1, const char* s2) {
     if (c1 != c2) {
       if (c1 == '\0' || c2 == '\0')
         return c1 - c2;
-      if ((c1 >= '0' && c1 <= '9') &&
-          (c2 >= '0' && c2 <= '9')) {
+      if (nolibc_isdigit(c1) &&
+          nolibc_isdigit(c2)) {
         int i1 = c1 - '0';
         int i2 = c2 - '0';
-        while (*s1 >= '0' && *s1 <= '9')
+        while (nolibc_isdigit(*s1))
           i1 = i1 * 10 + (*s1++ - '0');
-        while (*s2 >= '0' && *s2 <= '9')
+        while (nolibc_isdigit(*s2))
           i2 = i2 * 10 + (*s2++ - '0');
         if (i1 != i2)
           return i1 - i2;
