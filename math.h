@@ -23,4 +23,6 @@ bool nolibc_isnan(double x);
 double nolibc_scalbn(double x, int n);
 float nolibc_scalbnf(float x, int n);
 long double nolibc_scalbnl(long double x, int n);
-bool nolibc_signbit(double x);
+int nolibc_signbit(double x);
+int nolibc_signbitf(float x);
+int nolibc_signbitl(long double x);

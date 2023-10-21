@@ -13,8 +13,8 @@ char* nolibc_dirname(const char* path) {
     for (;runp != path; --runp)
       if (runp[-1] != '/')
         break;
-      if (runp != path)
-        last_slash = nolibc_memrchr(path, '/', runp - path);
+    if (runp != path)
+      last_slash = nolibc_memrchr(path, '/', runp - path);
   }
   if (last_slash) {
     char* runp = last_slash;
@@ -84,16 +84,10 @@ char nolibc_toascii(char c) {
   return c & 0x7F;
 }
 char* nolibc_strcat(char* dest, const char* src) {
-  char* ret = dest;
-  dest += nolibc_strlen(dest);
-  while ((*dest++ = *src++));
-  return ret;
+  return nolibc_strcpy(dest + nolibc_strlen(dest), src);
 }
 char* nolibc_strncat(char* dest, const char* src, size_t n) {
-  char* ret = dest;
-  dest += nolibc_strlen(dest);
-  while (n-- && (*dest++ = *src++));
-  return ret;
+  return nolibc_strncpy(dest + nolibc_strlen(dest), src, n);
 }
 char* nolibc_strchr(const char* str, char c) {
   while (*str) {

@@ -118,6 +118,12 @@ float nolibc_scalbnf(float x, int n) {
 long double nolibc_scalbnl(long double x, int n) {
   return x * (1 << n);
 }
-bool nolibc_signbit(double x) {
-  return *(uint64_t*)&x >> 63;
+int nolibc_signbit(double x) {
+  return __builtin_signbit(x);
+}
+int nolibc_signbitf(float x) {
+  return __builtin_signbitf(x);
+}
+int nolibc_signbitl(long double x) {
+  return __builtin_signbitl(x);
 }
