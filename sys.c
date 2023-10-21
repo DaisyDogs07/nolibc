@@ -76,13 +76,8 @@ int nolibc_adjtime(const struct timeval* itv, struct timeval* otv) {
   if (nolibc_clock_adjtime(CLOCK_REALTIME, &tntx) < 0)
     return -1;
   if (otv) {
-    if (tntx.offset < 0) {
-      otv->tv_sec = -(-tntx.offset / 1000000);
-      otv->tv_usec = -(-tntx.offset % 1000000);
-    } else {
-      otv->tv_sec = tntx.offset / 1000000;
-      otv->tv_usec = tntx.offset % 1000000;
-    }
+    otv->tv_sec = tntx.offset / 1000000;
+    otv->tv_usec = tntx.offset % 1000000;
   }
   return 0;
 }
